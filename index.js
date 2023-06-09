@@ -10,7 +10,7 @@ app.use(express.json());
 
 const data = require("./data.json");
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dp2hutp.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -78,10 +78,11 @@ const verifyAdmin = async (req, res, next) => {
 app.get("/", (req, res) => {
   res.send("finely tuned");
 });
-// sending demon class data
+// sending demo class data
 app.get("/classes", (req, res) => {
   res.send(data);
 });
+// checking user role
 app.get("/users/admin/:email", async (req, res) => {
   const query = { email: req?.params?.email };
   console.log(`query`, query);
@@ -90,10 +91,24 @@ app.get("/users/admin/:email", async (req, res) => {
   console.log(result);
   res.send(result);
 });
+// update role to instructor
+app.post("/users/instructor/:id", async (req, res) => {
+  const filter = { _id: new ObjectId(req?.params?.id) };
+  console.log(filter);
+  const updatedDoc = {
+    $set: {
+      role: "instructor",
+    },
+  };
+  const result = await userCollection.updateOne(filter, updatedDoc);
+  res.send(result);
+});
+// getting all the users
 app.get("/users", verifyJWT, async (req, res) => {
   const result = await userCollection.find().toArray();
   res.send(result);
 });
+// storing user while registering
 app.post("/users", async (req, res) => {
   const user = req.body;
   const query = { email: user.email };
@@ -106,6 +121,7 @@ app.post("/users", async (req, res) => {
     res.send(result);
   }
 });
+//
 app.listen(port, () => {
   console.log(`tuned at ${port}`);
 });
