@@ -58,7 +58,7 @@ const verifyJWT = (req, res, next) => {
 // jwt token
 app.post("/jwt", (req, res) => {
   const user = req.body;
-  console.log(user);
+
   const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
     expiresIn: 3600,
   });
@@ -79,23 +79,23 @@ const verifyAdmin = async (req, res, next) => {
 app.get("/", (req, res) => {
   res.send("finely tuned");
 });
-// sending demo class data
+// sending demo class data , TODO : from DB
 app.get("/classes", (req, res) => {
   res.send(data);
 });
 // checking user role
 app.get("/users/admin/:email", async (req, res) => {
   const query = { email: req?.params?.email };
-  console.log(`query`, query);
+
   const user = await userCollection.findOne(query);
   const result = { role: user.role };
-  console.log(result);
+
   res.send(result);
 });
 // update role to instructor
 app.post("/users/instructor/:id", async (req, res) => {
   const filter = { _id: new ObjectId(req?.params?.id) };
-  console.log(filter);
+
   const updatedDoc = {
     $set: {
       role: "instructor",
@@ -115,7 +115,6 @@ app.post("/users", async (req, res) => {
   const query = { email: user.email };
   const existingUser = await userCollection.findOne(query);
   if (existingUser) {
-    console.log(`User Exists`);
     return;
   } else {
     const result = await userCollection.insertOne(user);
@@ -129,7 +128,14 @@ app.post("/add-class", async (req, res) => {
   const result = await classCollection.insertOne(classInfo);
   res.send(result);
 });
-//
+// instructor class API
+app.get("/my-classes/instructor/:email", async (req, res) => {
+  const query = { instructorEmail: req?.params?.email };
+  console.log(query);
+  const result = await classCollection.find(query).toArray();
+  console.log("result", result);
+  res.send(result);
+});
 app.listen(port, () => {
   console.log(`tuned at ${port}`);
 });
