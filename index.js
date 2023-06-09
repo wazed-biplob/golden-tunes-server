@@ -22,6 +22,7 @@ const client = new MongoClient(uri, {
   },
 });
 const userCollection = client.db("golden-tunes").collection("users");
+const classCollection = client.db("golden-tunes").collection("class");
 
 async function run() {
   try {
@@ -120,6 +121,13 @@ app.post("/users", async (req, res) => {
     const result = await userCollection.insertOne(user);
     res.send(result);
   }
+});
+
+// add a class API
+app.post("/add-class", async (req, res) => {
+  const classInfo = req.body;
+  const result = await classCollection.insertOne(classInfo);
+  res.send(result);
 });
 //
 app.listen(port, () => {
