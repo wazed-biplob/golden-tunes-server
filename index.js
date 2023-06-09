@@ -63,8 +63,17 @@ app.post("/jwt", (req, res) => {
   });
   res.send({ token });
 });
-// verifying jwt
 
+// verifying admin
+const verifyAdmin = async (req, res, next) => {
+  const email = req.decoded.email;
+  const query = { email: email };
+  const user = await userCollection.findOne(query);
+  if (user?.role !== "admin") {
+    return res.status(403).send({ error: true, message: "Not Admin" });
+  }
+  next();
+};
 // checking if the server is running
 app.get("/", (req, res) => {
   res.send("finely tuned");
