@@ -65,7 +65,11 @@ app.post("/jwt", (req, res) => {
   });
   res.send({ token });
 });
-
+// class API for class page
+app.get("/approved-classes", async (req, res) => {
+  const result = await classCollection.find({ status: "approved" }).toArray();
+  res.send(result);
+});
 // verifying admin
 const verifyAdmin = async (req, res, next) => {
   const email = req.decoded.email;
@@ -80,13 +84,24 @@ const verifyAdmin = async (req, res, next) => {
 app.get("/", (req, res) => {
   res.send("finely tuned");
 });
-// sending demo class data , TODO : from DB
-app.get("/classes", async (req, res) => {
+// sending top 6 data to client
+app.get("/top-classes", async (req, res) => {
   const result = await classCollection
-    .find({ totalEnrolledStudents: { $exists: true } })
+    .find({
+      $and: [
+        { status: "approved" },
+        { totalEnrolledStudents: { $exists: true } },
+      ],
+    })
     .sort({ totalEnrolledStudents: -1 })
     .limit(6)
     .toArray();
+
+  res.send(result);
+});
+// class API for Admin
+app.get("/all-classes", async (req, res) => {
+  const result = await classCollection.find().toArray();
 
   res.send(result);
 });
