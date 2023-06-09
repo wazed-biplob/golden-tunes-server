@@ -24,6 +24,7 @@ const client = new MongoClient(uri, {
 const userCollection = client.db("golden-tunes").collection("users");
 const classCollection = client.db("golden-tunes").collection("class");
 const classesCollection = client.db("golden-tunes").collection("classes");
+const cartCollection = client.db("golden-tunes").collection("cart");
 
 async function run() {
   try {
@@ -64,6 +65,20 @@ app.post("/jwt", (req, res) => {
     expiresIn: 3600,
   });
   res.send({ token });
+});
+// students' selected classes
+app.post("/selected-classes", async (req, res) => {
+  const classInfo = req.body;
+  console.log(classInfo);
+  const result = await cartCollection.insertOne(classInfo);
+  res.send(result);
+});
+// students' class cart
+app.get("/selected-classes/:email", async (req, res) => {
+  const result = await cartCollection
+    .find({ userEmail: req?.params?.email })
+    .toArray();
+  res.send(result);
 });
 // class API for class page
 app.get("/approved-classes", async (req, res) => {
