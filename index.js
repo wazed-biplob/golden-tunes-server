@@ -23,6 +23,7 @@ const client = new MongoClient(uri, {
 });
 const userCollection = client.db("golden-tunes").collection("users");
 const classCollection = client.db("golden-tunes").collection("class");
+const classesCollection = client.db("golden-tunes").collection("classes");
 
 async function run() {
   try {
@@ -80,8 +81,14 @@ app.get("/", (req, res) => {
   res.send("finely tuned");
 });
 // sending demo class data , TODO : from DB
-app.get("/classes", (req, res) => {
-  res.send(data);
+app.get("/classes", async (req, res) => {
+  const result = await classCollection
+    .find({ totalEnrolledStudents: { $exists: true } })
+    .sort({ totalEnrolledStudents: -1 })
+    .limit(6)
+    .toArray();
+
+  res.send(result);
 });
 // checking user role
 app.get("/users/admin/:email", async (req, res) => {
@@ -131,9 +138,7 @@ app.post("/add-class", async (req, res) => {
 // instructor class API
 app.get("/my-classes/instructor/:email", async (req, res) => {
   const query = { instructorEmail: req?.params?.email };
-  console.log(query);
   const result = await classCollection.find(query).toArray();
-  console.log("result", result);
   res.send(result);
 });
 app.listen(port, () => {
