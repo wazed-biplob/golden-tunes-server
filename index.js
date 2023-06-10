@@ -162,17 +162,28 @@ app.post("/users", async (req, res) => {
     res.send(result);
   }
 });
-
+app.get("/popular-instructors", async (req, res) => {
+  const result = await userCollection.find({ role: "instructor" }).toArray();
+  res.send(result);
+});
 // add a class API
 app.post("/add-class", async (req, res) => {
   const classInfo = req.body;
   const result = await classCollection.insertOne(classInfo);
   res.send(result);
 });
+//
+
 // instructor class API
 app.get("/my-classes/instructor/:email", async (req, res) => {
   const query = { instructorEmail: req?.params?.email };
   const result = await classCollection.find(query).toArray();
+  res.send(result);
+});
+// payment History API
+app.get("/payments/:email", async (req, res) => {
+  const email = req.params.email;
+  const result = await paymentCollection.find({ email: email }).toArray();
   res.send(result);
 });
 // payment processed
