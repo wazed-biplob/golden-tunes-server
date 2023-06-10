@@ -145,6 +145,30 @@ app.get("/users/instructors", async (req, res) => {
   const result = await userCollection.find({ role: "instructor" }).toArray();
   res.send(result);
 });
+// Deny Class API
+app.post("/deny-class/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updatedDoc = {
+    $set: {
+      status: "denied",
+    },
+  };
+  const result = await classCollection.updateOne(filter, updatedDoc);
+  res.send(result);
+});
+// approve class API
+app.post("/approve-class/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updatedDoc = {
+    $set: {
+      status: "approved",
+    },
+  };
+  const result = await classCollection.updateOne(filter, updatedDoc);
+  res.send(result);
+});
 // getting all the users
 app.get("/users", verifyJWT, async (req, res) => {
   const result = await userCollection.find().toArray();
@@ -163,7 +187,10 @@ app.post("/users", async (req, res) => {
   }
 });
 app.get("/popular-instructors", async (req, res) => {
-  const result = await userCollection.find({ role: "instructor" }).toArray();
+  const result = await userCollection
+    .find({ role: "instructor" })
+    .limit(6)
+    .toArray();
   res.send(result);
 });
 // add a class API
