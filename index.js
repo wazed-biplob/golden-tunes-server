@@ -145,6 +145,20 @@ app.get("/users/instructors", async (req, res) => {
   const result = await userCollection.find({ role: "instructor" }).toArray();
   res.send(result);
 });
+// feedback API
+app.post("/class-feedback/:id", async (req, res) => {
+  const id = req.params.id;
+  const { feedback } = req.body;
+  const filter = { _id: new ObjectId(id) };
+  const updatedDoc = {
+    $set: {
+      feedback: feedback,
+    },
+  };
+  console.log(feedback);
+  const result = await classCollection.updateOne(filter, updatedDoc);
+  res.send(result);
+});
 // Deny Class API
 app.post("/deny-class/:id", async (req, res) => {
   const id = req.params.id;
