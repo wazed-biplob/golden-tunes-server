@@ -4,7 +4,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-
+const stripe = require("stripe")(process.env.GATEWAY_TOKEN);
 app.use(cors());
 app.use(express.json());
 
@@ -25,6 +25,7 @@ const userCollection = client.db("golden-tunes").collection("users");
 const classCollection = client.db("golden-tunes").collection("class");
 const classesCollection = client.db("golden-tunes").collection("classes");
 const cartCollection = client.db("golden-tunes").collection("cart");
+const paymentCollection = client.db("golden-tunes").collection("payments");
 
 async function run() {
   try {
@@ -171,6 +172,28 @@ app.get("/my-classes/instructor/:email", async (req, res) => {
   const result = await classCollection.find(query).toArray();
   res.send(result);
 });
+// payment processed
+app.post("/payments", async (req, res) => {
+  const payment = req.body;
+  const insertResult = await paymentCollection.insertOne(payment);
+
+  const query = { _id: new ObjectId(payment.classId) };
+
+  const deleteResult = await cartCollection.deleteOne(query);
+  res.send({ insertResult, deleteResult });
+});
+// payment-intent
+app.post("/create-payment-intent", async (req, res) => {
+  const { price } = req.body;
+  const amount = parseInt(price * 100);
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amount,
+    currency: "usd",
+    payment_method_types: ["card"],
+  });
+  res.send({ clientSecret: paymentIntent.client_secret });
+});
+
 app.listen(port, () => {
   console.log(`tuned at ${port}`);
 });
