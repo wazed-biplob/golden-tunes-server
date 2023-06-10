@@ -8,8 +8,6 @@ const stripe = require("stripe")(process.env.GATEWAY_TOKEN);
 app.use(cors());
 app.use(express.json());
 
-const data = require("./data.json");
-
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dp2hutp.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -140,6 +138,11 @@ app.post("/users/instructor/:id", async (req, res) => {
     },
   };
   const result = await userCollection.updateOne(filter, updatedDoc);
+  res.send(result);
+});
+// instructors API
+app.get("/users/instructors", async (req, res) => {
+  const result = await userCollection.find({ role: "instructor" }).toArray();
   res.send(result);
 });
 // getting all the users
