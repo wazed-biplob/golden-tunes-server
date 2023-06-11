@@ -159,6 +159,17 @@ app.post("/class-feedback/:id", async (req, res) => {
   const result = await classCollection.updateOne(filter, updatedDoc);
   res.send(result);
 });
+//
+app.post("/class-seat-count/:id", async (req, res) => {
+  const id = req?.params?.id;
+  console.log(id);
+  const result = await classCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $inc: { availableSeats: -1, totalEnrolledStudents: 1 } }
+  );
+
+  res.send(result);
+});
 // Deny Class API
 app.post("/deny-class/:id", async (req, res) => {
   const id = req.params.id;
@@ -200,6 +211,7 @@ app.post("/users", async (req, res) => {
     res.send(result);
   }
 });
+// finding top popular instructor
 app.get("/popular-instructors", async (req, res) => {
   const result = await userCollection
     .find({ role: "instructor" })
